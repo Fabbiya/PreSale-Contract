@@ -1,0 +1,12 @@
+npm init
+npm install truffle --save-dev
+truffle init
+npm i @openzeppelin/contracts
+
+truffle create contract YourContractName
+
+npm install @truffle/hdwallet-provider
+
+truffle compile
+truffle deploy network=bsc_testnet
+truffle run verify DMT --network=bsc_testnet
