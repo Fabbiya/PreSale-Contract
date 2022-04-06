@@ -3,63 +3,65 @@ pragma solidity >=0.4.22 <0.9.0;
 
 /*
  *Demetra.finance
- *Inheritance Protocol Provider
- *Inheritance protoloc eliminates concerns about loss of crypto assets after the death
+ *Security Provider
+ *Inheritance protocol eliminates concerns about loss of crypto assets even after the death with assigning backup wallet or setup a will
+ *Private sale contract with 3 Tiers with different allocation
+ *Tier 0.0 -> public
+ *Tier 1.0 -> 0.1 - 5 BNB
+ *Tier 2.0 -> 5 - 20 BNB
  */
 
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-//import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-
 contract DemetraPresale is Ownable {
-    //select sale : tier1 whitelist = 1 , tier2 whitelist = 2
+    
     bool public isPublic;
     //token attributes
-    string public constant NAME = "DMT Presale"; //name of the contract
-    uint256 public  maxCap = 200 * (10**18); // Max cap in BNB
+    string public constant NAME = "DMT Private Sale"; //name of the contract
+    uint256 public  maxCap = 500 * (10**18); // Max cap in BNB
 
     uint256 public saleStartTime; // start sale time
     uint256 public saleEndTime; // end sale time in tier 1
 
     uint256 public totalBnbReceivedInAllTier; // total bnd received
 
+    uint256 public totalBnbInTierZero; // total bnb for tier Zero
     uint256 public totalBnbInTierOne; // total bnb for tier one
     uint256 public totalBnbInTierTwo; // total bnb for tier two
-    uint256 public totalBnbInTierThree; // total bnb for tier three
 
     uint256 public totalparticipants; // total participants
     address payable public projectOwner; // project Owner
 
     // max cap per tier
 
+    uint256 public tierZeroMaxCap;
     uint256 public tierOneMaxCap;
     uint256 public tierTwoMaxCap;
-    uint256 public tierThreeMaxCap;
 
     //max allocations per user in a tier
 
+    uint256 public maxAllocaPerUserTierZero;
     uint256 public maxAllocaPerUserTierOne;
     uint256 public maxAllocaPerUserTierTwo;
-    uint256 public maxAllocaPerUserTierThree;
 
     //min allocation per user in a tier
 
+    uint256 public minAllocaPerUserTierZero;
     uint256 public minAllocaPerUserTierOne;
     uint256 public minAllocaPerUserTierTwo;
-    uint256 public minAllocaPerUserTierThree;
 
-    //tier 0 is puvlic no whitelist
+    //tier 1 is public no whitelist
     // address array for tier one whitelist
     //address[] private whitelistTierOne;
+    address[] private whitelistTierOne;
     address[] private whitelistTierTwo;
-    address[] private whitelistTierThree;
 
     //mapping the user purchase per tier
 
-    mapping(address => uint256) public buyInOneTier;
-    mapping(address => uint256) public buyInTwoTier;
-    mapping(address => uint256) public buyInThreeTier;
+    mapping(address => uint256) public buyInTierZero;
+    mapping(address => uint256) public buyInTierOne;
+    mapping(address => uint256) public buyInTierTwo;
 
     
 
@@ -68,8 +70,8 @@ contract DemetraPresale is Ownable {
         uint256 _saleStartTime,
         uint256 _saleEndTime,
         address payable _projectOwner,
-        uint256 _tierTwoValue,
-        uint256 _tierThreeValue
+        uint256 _tierOneValue, //percentage eg = 30
+        uint256 _tierTwoValue //percentage eg = 70
       ) {
         isPublic = false; //whitelist
 
@@ -78,31 +80,31 @@ contract DemetraPresale is Ownable {
 
         projectOwner = _projectOwner;
 
+        tierOneMaxCap = _tierOneValue * (maxCap / 100);
         tierTwoMaxCap = _tierTwoValue * (maxCap / 100);
-        tierThreeMaxCap = _tierThreeValue * (maxCap / 100);
-        tierOneMaxCap = maxCap - tierTwoMaxCap - tierThreeMaxCap; //public
+        tierZeroMaxCap = maxCap - tierOneMaxCap - tierTwoMaxCap; //public
 
-        minAllocaPerUserTierOne = 1;
-        minAllocaPerUserTierTwo = 10**17;
-        minAllocaPerUserTierThree = 5 * (10**18);
+        minAllocaPerUserTierZero = 10 **17;
+        minAllocaPerUserTierOne = 10**17;
+        minAllocaPerUserTierTwo = 5 * (10**18);
 
-        maxAllocaPerUserTierOne = 20 * 10**18;
-        maxAllocaPerUserTierTwo = 5 * 10**18;
-        maxAllocaPerUserTierThree = 20 * 10**18;
+        maxAllocaPerUserTierZero = 20 * 10**18;
+        maxAllocaPerUserTierOne = 5 * 10**18;
+        maxAllocaPerUserTierTwo = 20 * 10**18;
 
         totalparticipants = 0;
     }
 
     // function to update the tiers value manually
     function updateTierCaps(
+        uint256 _tierZeroValue,
         uint256 _tierOneValue,
-        uint256 _tierTwoValue,
-        uint256 _tierThreeValue
+        uint256 _tierTwoValue
       ) external onlyOwner {
+        tierZeroMaxCap = _tierZeroValue;
         tierOneMaxCap = _tierOneValue;
         tierTwoMaxCap = _tierTwoValue;
-        tierThreeMaxCap = _tierThreeValue;
-        maxCap = tierOneMaxCap + tierTwoMaxCap + tierThreeMaxCap;
+        maxCap = tierZeroMaxCap + tierOneMaxCap + tierTwoMaxCap;
 
         //maxAllocaPerUserTierOne = tierOneMaxCap / totalUserInTierOne;
         //maxAllocaPerUserTierTwo = tierTwoMaxCap / totalUserInTierTwo;
@@ -119,27 +121,26 @@ contract DemetraPresale is Ownable {
         saleEndTime = _salesEndTime;
     }
 
+    //add the address in Whitelist tier one to invest
+    function addWhitelistOne(address _address) external onlyOwner {
+        require(_address != address(0), "Invalid address");
+        whitelistTierOne.push(_address);
+    }
+
     //add the address in Whitelist tier two to invest
     function addWhitelistTwo(address _address) external onlyOwner {
         require(_address != address(0), "Invalid address");
         whitelistTierTwo.push(_address);
     }
 
-    //add the address in Whitelist tier two to invest
-    function addWhitelistThree(address _address) external onlyOwner {
-        require(_address != address(0), "Invalid address");
-        whitelistTierThree.push(_address);
-    }
-
    
 
     // check the address in whitelist tier two
-    function getWhitelistTwo(address _address) public view returns (bool) {
+    function getWhitelistOne(address _address) public view returns (bool) {
         uint256 i;
-        uint256 length = whitelistTierTwo.length;
+        uint256 length = whitelistTierOne.length;
         for (i = 0; i < length; i++) {
-            address _addressArr = whitelistTierTwo[i];
-            if (_addressArr == _address) {
+            if (whitelistTierOne[i] == _address) {
                 return true;
             }
         }
@@ -147,12 +148,11 @@ contract DemetraPresale is Ownable {
     }
 
     // check the address in whitelist tier three
-    function getWhitelistThree(address _address) public view returns (bool) {
+    function getWhitelistTwo(address _address) public view returns (bool) {
         uint256 i;
-        uint256 length = whitelistTierThree.length;
+        uint256 length = whitelistTierTwo.length;
         for (i = 0; i < length; i++) {
-            address _addressArr = whitelistTierThree[i];
-            if (_addressArr == _address) {
+            if (whitelistTierTwo[i] == _address) {
                 return true;
             }
         }
@@ -203,71 +203,74 @@ contract DemetraPresale is Ownable {
 
         if (isPublic) {
             require(
-                buyInOneTier[msg.sender] + msg.value >= minAllocaPerUserTierOne,
+                buyInTierZero[msg.sender] + msg.value >= minAllocaPerUserTierZero,
+                "your purchasing Power is so Low"
+            );
+            require(
+                buyInTierZero[msg.sender] + msg.value <= maxAllocaPerUserTierZero,
+                "you are investing more than your Tier 0.0 limit!"
+            );
+            require(
+                totalBnbInTierZero + msg.value <= tierZeroMaxCap,
+                "buyTokens: purchase would exceed Tier one max cap"
+            );
+            require(
+                buyInTierZero[msg.sender] +buyInTierOne[msg.sender] +buyInTierTwo[msg.sender] + msg.value <= maxAllocaPerUserTierZero,
+                "buyTokens:You are investing more than your all Tiers limit!"
+            );
+
+            
+
+            buyInTierZero[msg.sender] += msg.value;
+            totalBnbReceivedInAllTier += msg.value;
+            totalBnbInTierZero += msg.value;
+            
+             payable(projectOwner).transfer(address(this).balance);
+        } else if (getWhitelistOne(msg.sender)) {
+            require(
+                buyInTierOne[msg.sender] + msg.value >= minAllocaPerUserTierOne,
                 "your purchasing Power is so Low"
             );
             require(
                 totalBnbInTierOne + msg.value <= tierOneMaxCap,
-                "buyTokens: purchase would exceed Tier one max cap"
+                "buyTokens: purchase would exceed Tier 1.0 max cap"
             );
             require(
-                buyInOneTier[msg.sender] + msg.value <= maxAllocaPerUserTierOne,
-                "buyTokens:You are investing more than your tier-1 limit!"
+                buyInTierOne[msg.sender] + msg.value <= maxAllocaPerUserTierOne,
+                "buyTokens:You are investing more than your Tier 1.0 limit!"
             );
-
             require(
-                buyInTwoTier[msg.sender] + msg.value <= maxAllocaPerUserTierOne,
-                "buyTokens:You are investing more than your all tier limit!"
+                buyInTierZero[msg.sender] +buyInTierOne[msg.sender] +buyInTierTwo[msg.sender] + msg.value <= maxAllocaPerUserTierOne,
+                "buyTokens:You are investing more than your all Tiers limit!"
             );
 
-            require(
-                buyInThreeTier[msg.sender] + msg.value <= maxAllocaPerUserTierOne,
-                "buyTokens:You are investing more than your all tier limit!"
-            );
-
-            buyInOneTier[msg.sender] += msg.value;
+            buyInTierOne[msg.sender] += msg.value;
             totalBnbReceivedInAllTier += msg.value;
             totalBnbInTierOne += msg.value;
-            
-             payable(projectOwner).transfer(address(this).balance);
-        } else if (getWhitelistTwo(msg.sender)) {
-            require(
-                buyInTwoTier[msg.sender] + msg.value >= minAllocaPerUserTierTwo,
-                "your purchasing Power is so Low"
-            );
-            require(
-                totalBnbInTierTwo + msg.value <= tierTwoMaxCap,
-                "buyTokens: purchase would exceed Tier two max cap"
-            );
-            require(
-                buyInTwoTier[msg.sender] + msg.value <= maxAllocaPerUserTierTwo,
-                "buyTokens:You are investing more than your tier-2 limit!"
-            );
-
-            buyInTwoTier[msg.sender] += msg.value;
-            totalBnbReceivedInAllTier += msg.value;
-            totalBnbInTierTwo += msg.value;
             //sendValue(projectOwner, address(this).balance);
             payable(projectOwner).transfer(address(this).balance);
-        } else if (getWhitelistThree(msg.sender)) {
+        } else if (getWhitelistTwo(msg.sender)) {
             require(
-                buyInThreeTier[msg.sender] + msg.value >=
-                    minAllocaPerUserTierThree,
+                buyInTierTwo[msg.sender] + msg.value >=
+                    minAllocaPerUserTierTwo,
                 "your purchasing Power is so Low"
             );
             require(
-                buyInThreeTier[msg.sender] + msg.value <=
-                    maxAllocaPerUserTierThree,
+                buyInTierTwo[msg.sender] + msg.value <=
+                    maxAllocaPerUserTierTwo,
                 "buyTokens:You are investing more than your tier-3 limit!"
             );
             require(
-                totalBnbInTierThree + msg.value <= tierThreeMaxCap,
+                totalBnbInTierTwo + msg.value <= tierTwoMaxCap,
                 "buyTokens: purchase would exceed Tier three max cap"
             );
-
-            buyInThreeTier[msg.sender] += msg.value;
+            require(
+                buyInTierZero[msg.sender] +buyInTierOne[msg.sender] +buyInTierTwo[msg.sender] + msg.value <= maxAllocaPerUserTierTwo,
+                "buyTokens:You are investing more than your all Tiers limit!"
+            );
+            buyInTierTwo[msg.sender] += msg.value;
             totalBnbReceivedInAllTier += msg.value;
-            totalBnbInTierThree += msg.value;
+            totalBnbInTierTwo += msg.value;
             payable(projectOwner).transfer(address(this).balance);
 
         } else {
