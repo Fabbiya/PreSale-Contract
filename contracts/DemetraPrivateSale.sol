@@ -34,19 +34,16 @@ contract DemetraPrivateSale is Ownable {
     address payable public projectOwner; // project Owner
 
     // max cap per tier
-
     uint256 public tierZeroMaxCap;
     uint256 public tierOneMaxCap;
     uint256 public tierTwoMaxCap;
 
     //max allocations per user in a tier
-
     uint256 public maxAllocaPerUserTierZero;
     uint256 public maxAllocaPerUserTierOne;
     uint256 public maxAllocaPerUserTierTwo;
 
     //min allocation per user in a tier
-
     uint256 public minAllocaPerUserTierZero;
     uint256 public minAllocaPerUserTierOne;
     uint256 public minAllocaPerUserTierTwo;
