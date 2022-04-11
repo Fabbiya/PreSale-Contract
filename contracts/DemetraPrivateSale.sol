@@ -74,7 +74,9 @@ contract DemetraPrivateSale is Ownable {
         uint256 _saleEndTime,
         address payable _projectOwner,
         uint256 _tierOneValue, //percentage eg = 30
-        uint256 _tierTwoValue //percentage eg = 70
+        uint256 _tierTwoValue, //percentage eg = 70
+        address[] memory _whitelistTierOne,
+        address[] memory _whitelistTierTwo
       ) {
         isPublic = false; //whitelist
 
@@ -94,6 +96,14 @@ contract DemetraPrivateSale is Ownable {
         maxAllocaPerUserTierZero = 20 * 10**18;
         maxAllocaPerUserTierOne = 5 * 10**18;
         maxAllocaPerUserTierTwo = 20 * 10**18;
+
+        for (uint256 index = 0; index < _whitelistTierOne.length; index++) {
+            whitelistTierOne.push(_whitelistTierOne[index]);
+        }
+
+        for (uint256 index = 0; index < _whitelistTierTwo.length; index++) {
+            whitelistTierTwo.push(_whitelistTierTwo[index]);
+        }
 
         totalparticipants = 0;
     }
