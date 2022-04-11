@@ -107,6 +107,7 @@ module.exports = function (deployer) {
     "0x94d0B565b4889aFc869600E1D116Edd1D0FFe909",
     "0x1298a93623B7e526eF572a3C408e881e32774d97",
     "0xc806b0a637A1339377fAC32A32A482170C6A2D84",
+    "0x43347293eC482c17895c2de16A3a73926B6B6466",
   ];
   var _whitelistTier2 = [
     "0xfd9d11095ec4dffbc54eabd96dcf90c9ed897e51",
