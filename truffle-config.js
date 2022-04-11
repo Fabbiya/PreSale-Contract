@@ -65,7 +65,10 @@ module.exports = {
       timeoutBlocks: 200,
       skipDryRun: true,
     },
-
+    truffle_dashboard: {
+      url: "http://localhost:24012/rpc",
+      network_id:97
+    },
     // Set default mocha options here, use special reporters etc.
     mocha: {
       // timeout: 100000
@@ -77,4 +80,8 @@ module.exports = {
     matic: process.env.MATIC_APIKEY,
     bscscan: "UR4ZGJRAZSV12UNGS918GYMYVKDTS6CY4H",
   },
+  dashboard: {
+    port: 25012,
+    host: "localhost"
+  }
 };

@@ -14,12 +14,12 @@ pragma solidity >=0.4.22 <0.9.0;
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract DemetraPresale is Ownable {
+contract DemetraPrivateSale is Ownable {
     
     bool public isPublic;
     //token attributes
     string public constant NAME = "DMT Private Sale"; //name of the contract
-    uint256 public  maxCap = 500 * (10**18); // Max cap in BNB
+    uint256 public  maxCap = 400 * (10**18); // Max cap in BNB
 
     uint256 public saleStartTime; // start sale time
     uint256 public saleEndTime; // end sale time in tier 1
@@ -63,6 +63,9 @@ contract DemetraPresale is Ownable {
     mapping(address => uint256) public buyInTierOne;
     mapping(address => uint256) public buyInTierTwo;
 
+    address[] public tierZeroParticipants;
+    address[] public tierOneParticipants;
+    address[] public tierTwoParticipants;
     
 
     // CONSTRUCTOR
@@ -95,32 +98,33 @@ contract DemetraPresale is Ownable {
         totalparticipants = 0;
     }
 
-    // function to update the tiers value manually
-    function updateTierCaps(
-        uint256 _tierZeroValue,
-        uint256 _tierOneValue,
-        uint256 _tierTwoValue
-      ) external onlyOwner {
-        tierZeroMaxCap = _tierZeroValue;
-        tierOneMaxCap = _tierOneValue;
-        tierTwoMaxCap = _tierTwoValue;
-        maxCap = tierZeroMaxCap + tierOneMaxCap + tierTwoMaxCap;
-
-        //maxAllocaPerUserTierOne = tierOneMaxCap / totalUserInTierOne;
-        //maxAllocaPerUserTierTwo = tierTwoMaxCap / totalUserInTierTwo;
-    }
+    
 
      //function to set tier manually
     function changeTier(
         bool _isPublic,
-        uint256 _salesStartTime,
-        uint256 _salesEndTime
+        uint256 _tierOneValue,
+        uint256 _tierTwoValue
     ) external onlyOwner {
         isPublic = _isPublic;
-        saleStartTime = _salesStartTime;
-        saleEndTime = _salesEndTime;
+        if(isPublic){
+            tierZeroMaxCap = maxCap - totalBnbReceivedInAllTier;
+            tierOneMaxCap = totalBnbInTierOne;
+            tierTwoMaxCap=totalBnbInTierTwo;
+        }
+        else{
+            tierZeroMaxCap = 0;
+            tierOneMaxCap = _tierOneValue * (maxCap / 100);
+            tierTwoMaxCap = _tierTwoValue * (maxCap / 100);
+        }
     }
 
+    function setStartTime(uint256 start) external onlyOwner{
+        saleStartTime = start;
+    }
+    function setEndTime(uint256 end) external onlyOwner{
+        saleEndTime = end;
+    }
     //add the address in Whitelist tier one to invest
     function addWhitelistOne(address _address) external onlyOwner {
         require(_address != address(0), "Invalid address");
@@ -194,6 +198,7 @@ contract DemetraPresale is Ownable {
             
 
             buyInTierZero[msg.sender] += msg.value;
+            tierZeroParticipants.push(msg.sender);
             totalBnbReceivedInAllTier += msg.value;
             totalBnbInTierZero += msg.value;
             
@@ -219,6 +224,7 @@ contract DemetraPresale is Ownable {
             );
 
             buyInTierOne[msg.sender] += msg.value;
+            tierOneParticipants.push(msg.sender);
             totalBnbReceivedInAllTier += msg.value;
             totalBnbInTierOne += msg.value;
             //sendValue(projectOwner, address(this).balance);
@@ -244,6 +250,7 @@ contract DemetraPresale is Ownable {
                 "buyTokens:You are investing more than your all Tiers limit!"
             );
             buyInTierTwo[msg.sender] += msg.value;
+            tierTwoParticipants.push(msg.sender);
             totalBnbReceivedInAllTier += msg.value;
             totalBnbInTierTwo += msg.value;
             //payable(projectOwner).transfer(address(this).balance);
