@@ -17,7 +17,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract DemetraPrivateSale is Ownable {
     
     bool public isPublic;
-    //token attributes
+  
     string public constant NAME = "DMT Private Sale"; //name of the contract
     uint256 public  maxCap = 400 * (10**18); // Max cap in BNB
 
@@ -51,14 +51,11 @@ contract DemetraPrivateSale is Ownable {
     uint256 public minAllocaPerUserTierOne;
     uint256 public minAllocaPerUserTierTwo;
 
-    //tier 1 is public no whitelist
-    // address array for tier one whitelist
-    //address[] private whitelistTierOne;
+    //tier zero is public no whitelist
     address[] private whitelistTierOne;
     address[] private whitelistTierTwo;
 
     //mapping the user purchase per tier
-
     mapping(address => uint256) public buyInTierZero;
     mapping(address => uint256) public buyInTierOne;
     mapping(address => uint256) public buyInTierTwo;
@@ -149,7 +146,7 @@ contract DemetraPrivateSale is Ownable {
 
    
 
-    // check the address in whitelist tier two
+    // check the address in whitelist tier one
     function getWhitelistOne(address _address) public view returns (bool) {
         uint256 i;
         uint256 length = whitelistTierOne.length;
@@ -161,7 +158,7 @@ contract DemetraPrivateSale is Ownable {
         return false;
     }
 
-    // check the address in whitelist tier three
+    // check the address in whitelist tier two
     function getWhitelistTwo(address _address) public view returns (bool) {
         uint256 i;
         uint256 length = whitelistTierTwo.length;
@@ -180,8 +177,8 @@ contract DemetraPrivateSale is Ownable {
         require(
             block.timestamp >= saleStartTime,
             "The sale is not started yet "
-        ); // solhint-disable
-        require(block.timestamp <= saleEndTime, "The sale is closed"); // solhint-disable
+        ); 
+        require(block.timestamp <= saleEndTime, "The sale is closed"); 
         require(
             totalBnbReceivedInAllTier + msg.value <= maxCap,
             "buyTokens: purchase would exceed max cap"
@@ -204,17 +201,12 @@ contract DemetraPrivateSale is Ownable {
                 buyInTierZero[msg.sender] +buyInTierOne[msg.sender] +buyInTierTwo[msg.sender] + msg.value <= maxAllocaPerUserTierZero,
                 "buyTokens:You are investing more than your all Tiers limit!"
             );
-
-            
-
             buyInTierZero[msg.sender] += msg.value;
             tierZeroParticipants.push(msg.sender);
             totalBnbReceivedInAllTier += msg.value;
             totalBnbInTierZero += msg.value;
-            
-             //payable(projectOwner).transfer(address(this).balance);
              Address.sendValue(payable(projectOwner), address(this).balance);
-             //payable(projectOwner).sendValue(projectOwner,address(this).balance);
+            
         } else if (getWhitelistOne(msg.sender)) {
             require(
                 buyInTierOne[msg.sender] + msg.value >= minAllocaPerUserTierOne,
@@ -237,8 +229,7 @@ contract DemetraPrivateSale is Ownable {
             tierOneParticipants.push(msg.sender);
             totalBnbReceivedInAllTier += msg.value;
             totalBnbInTierOne += msg.value;
-            //sendValue(projectOwner, address(this).balance);
-            //payable(projectOwner).transfer(address(this).balance);
+            
             Address.sendValue(payable(projectOwner), address(this).balance);
         } else if (getWhitelistTwo(msg.sender)) {
             require(
@@ -263,7 +254,6 @@ contract DemetraPrivateSale is Ownable {
             tierTwoParticipants.push(msg.sender);
             totalBnbReceivedInAllTier += msg.value;
             totalBnbInTierTwo += msg.value;
-            //payable(projectOwner).transfer(address(this).balance);
             Address.sendValue(payable(projectOwner), address(this).balance);
         } else {
             revert();
