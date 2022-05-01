@@ -1,8 +1,8 @@
 const DemetraPrivateSale = artifacts.require("DemetraPrivateSale");
 
 module.exports = function (deployer) {
-  var _saleStartTime = 1649703600; 
-  var _saleEndTime = 1650265200; 
+  var _saleStartTime = 1651510800;
+  var _saleEndTime = 1652202000;
   var _projectOwner = "0xB54F3E78A0215320bC383d1236A3AFfeBeC4af3d";
   var _whitelist = [
     "0xb2a05f7ec48910e581eec4b521325ab1857850c9",
@@ -239,7 +239,24 @@ module.exports = function (deployer) {
     "0xd1371ff55ab43ef02ea6d1d6b7a978adaaef0928",
     "0x5efea97a79d12ba7f126b50624c92e3aab4868a1",
     "0x73d98044fd343717fabdede55076375c86e986a6",
+    "0x72404c0cA5C8c811B87bf39EFD377e631B3a8C5f",
+    "0x0AB610E01852a40B6fEF6772b02F4C6abF15B899",
+    "0xe7c032c39c94598DC0f64c47673AfA2FDB554d2f",
+    "0x5C6Ae285c0DBd1bd8B3614FE5d1c0B0D40255B0a",
+    "0xbA89E424D003Be75529D7F658A605d9510aF3b64",
+    "0x837f51D433b89902a72AC5DFdC9464c61CC072B2",
+    "0x4ec738940E85e3d2a6Dfbfa0C8Ce617935190248",
+    "0x24D92C3547487286C42e9Dc42Fb2BD1C4291BCD7",
+    "0xEA4D105c0E7112d3F3c7995E7d8c2316F7D49DCb",
+    "0x9C7fF6d7DfE819a6f8Ac8214c5384F83aEBfb5cC",
+    "0xaA7db76Daa94638F91D4F8A3311B064A4699a563",
   ];
- 
-  deployer.deploy(DemetraPrivateSale,_saleStartTime,_saleEndTime,_projectOwner,_whitelist);
+
+  deployer.deploy(
+    DemetraPrivateSale,
+    _saleStartTime,
+    _saleEndTime,
+    _projectOwner,
+    _whitelist
+  );
 };
