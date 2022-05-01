@@ -4,9 +4,7 @@ module.exports = function (deployer) {
   var _saleStartTime = 1649703600; 
   var _saleEndTime = 1650265200; 
   var _projectOwner = "0xB54F3E78A0215320bC383d1236A3AFfeBeC4af3d";
-  var _tierTwoValue = 30;
-  var _tierThreeValue = 70;
-  var _whitelistTier1 = [
+  var _whitelist = [
     "0xb2a05f7ec48910e581eec4b521325ab1857850c9",
     "0xa9abf4f35792d1e01ffd0023fd54aa6ab659630a",
     "0xaf8bf0da3f4485f72b8d8b09ceb0de9d87e58570",
@@ -108,8 +106,6 @@ module.exports = function (deployer) {
     "0x1298a93623B7e526eF572a3C408e881e32774d97",
     "0xc806b0a637A1339377fAC32A32A482170C6A2D84",
     "0x43347293eC482c17895c2de16A3a73926B6B6466",
-  ];
-  var _whitelistTier2 = [
     "0xfd9d11095ec4dffbc54eabd96dcf90c9ed897e51",
     "0x15f62c92c5a1b3172b071e3391c82bf815c5e4c8",
     "0x8ca38e86a315d73667e34af762f37a91dc6d60ec",
@@ -244,5 +240,6 @@ module.exports = function (deployer) {
     "0x5efea97a79d12ba7f126b50624c92e3aab4868a1",
     "0x73d98044fd343717fabdede55076375c86e986a6",
   ];
-  deployer.deploy(DemetraPrivateSale,_saleStartTime,_saleEndTime,_projectOwner,_tierTwoValue,_tierThreeValue,_whitelistTier1,_whitelistTier2);
+ 
+  deployer.deploy(DemetraPrivateSale,_saleStartTime,_saleEndTime,_projectOwner,_whitelist);
 };
