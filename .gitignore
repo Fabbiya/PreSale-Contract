@@ -77,3 +77,9 @@ typings/
 
 # Truffle secret file
 .secret
+
+/build
+/migrations
+/test
+solidityStart.txt
+truffle-config.js
